@@ -5,6 +5,8 @@ import com.agentclientprotocol.client.ClientInfo
 import com.agentclientprotocol.client.ClientSession
 import com.agentclientprotocol.client.ClientSupport
 import com.agentclientprotocol.common.ClientSessionOperations
+import com.agentclientprotocol.common.Event
+import com.agentclientprotocol.common.SessionParameters
 import com.agentclientprotocol.model.*
 import com.agentclientprotocol.protocol.Protocol
 import com.agentclientprotocol.transport.StdioTransport
@@ -14,6 +16,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.io.asSink
 import kotlinx.io.asSource
 import kotlinx.io.buffered
@@ -42,7 +45,9 @@ class AcpChatToolWindowFactory : ToolWindowFactory {
         private var protocol: Protocol? = null
         private var proc: Process? = null
         private var scope: CoroutineScope? = null
+        private var clientSession: ClientSession? = null
         private var sessionId: SessionId? = null
+        private var sessionOperations: ClientSessionOperations? = null
         
         // UI组件
         private val messageArea = JTextArea()
@@ -97,30 +102,33 @@ class AcpChatToolWindowFactory : ToolWindowFactory {
         
         private fun sendMessage() {
             val message = inputField.text.trim()
-            if (message.isNotEmpty() && client != null) {
-                // 清空输入框
-                inputField.text = ""
-                
-                // 显示用户消息
-                appendMessage("You: $message\n")
-                
-                // 发送消息到ACP客户端
-                scope?.launch {
-                    try {
-                        if (sessionId != null) {
-                            // 尝试通过Protocol发送请求
-                            protocol?.let { p ->
-                                // 这里需要查看Protocol类的API来确定正确的发送方法
-                                // 暂时显示消息表示功能待实现
-                                appendMessage("Message sent: $message\n")
-                            }
-                        } else {
-                            appendMessage("Error: Session not initialized\n")
+            if (message.isEmpty()) return
+            val session = clientSession
+            if (session == null) {
+                appendMessage("Error: Session not initialized\n")
+                return
+            }
+
+            // 清空输入框
+            inputField.text = ""
+
+            // 显示用户消息
+            appendMessage("You: $message\n")
+
+            // 发送消息到ACP客户端
+            scope?.launch {
+                try {
+                    session.prompt(
+                        listOf(ContentBlock.Text(message))
+                    ).collect { event ->
+                        when (event) {
+                            is Event.SessionUpdateEvent -> handleNotification(event.update)
+                            is Event.PromptResponseEvent -> appendMessage("Message sent successfully\n")
                         }
-                    } catch (e: Exception) {
-                        this@AcpChatToolWindow.log.error("Failed to send message", e)
-                        appendMessage("Error: Failed to send message\n")
                     }
+                } catch (e: Exception) {
+                    this@AcpChatToolWindow.log.error("Failed to send message", e)
+                    appendMessage("Error: Failed to send message: ${e.message}\n")
                 }
             }
         }
@@ -177,7 +185,8 @@ class AcpChatToolWindowFactory : ToolWindowFactory {
                             // 保存sessionId
                             sessionId = session.sessionId
                             
-                            return object : ClientSessionOperations {
+                            // 创建并保存ClientSessionOperations对象
+                            val operations = object : ClientSessionOperations {
                                 override suspend fun requestPermissions(
                                     toolCall: SessionUpdate.ToolCallUpdate,
                                     permissions: List<PermissionOption>,
@@ -195,6 +204,11 @@ class AcpChatToolWindowFactory : ToolWindowFactory {
                                     handleNotification(notification)
                                 }
                             }
+                            
+                            // 保存ClientSessionOperations对象
+                            sessionOperations = operations
+                            
+                            return operations
                         }
                     }
                     
@@ -213,8 +227,20 @@ class AcpChatToolWindowFactory : ToolWindowFactory {
                         )
                     )
                     
+                    try {
+                        val sessionParameters = SessionParameters(
+                            cwd = System.getProperty("user.dir"),
+                            mcpServers = emptyList()
+                        )
+                        clientSession = client!!.newSession(sessionParameters)
+                        sessionId = clientSession?.sessionId
+                    } catch (e: Exception) {
+                        this@AcpChatToolWindow.log.warn("Failed to create session", e)
+                    }
+                    
                     SwingUtilities.invokeLater {
                         appendMessage("ACP client initialized successfully.\n")
+                        appendMessage("Session created with ID: ${sessionId?.value}\n")
                         appendMessage("You can now send messages.\n")
                     }
                 } catch (t: Throwable) {

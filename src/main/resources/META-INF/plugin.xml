@@ -10,6 +10,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.hbuzxl.intellijplatformplugindemo.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow factoryClass="com.github.hbuzxl.intellijplatformplugindemo.toolWindow.AcpChatToolWindowFactory" id="ACP Chat" anchor="bottom"/>
         <postStartupActivity implementation="com.github.hbuzxl.intellijplatformplugindemo.startup.MyProjectActivity" />
         <notificationGroup id="Plugin Notifications" displayType="BALLOON" isLogByDefault="true"/>
     </extensions>

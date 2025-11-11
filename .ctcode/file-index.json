@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "timestamp": 1762844551857,
+  "workspacePath": "/Users/zxl/Project/intellij-platform-plugin-demo",
+  "indexes": [
+    {
+      "filePath": "src/main/kotlin/com/github/hbuzxl/intellijplatformplugindemo/StartAcpAction.kt",
+      "hash": "cc9fbe255777f1931af7bf68aad8bda981fda5202723e6f852247338bea01117",
+      "lastModified": 1762844543685,
+      "size": 6198,
+      "scanned": false
+    },
+    {
+      "filePath": "src/main/resources/META-INF/plugin.xml",
+      "hash": "534610b37d15b9a85c5628974fc20655f84b2916d63383bde0cca63a741da5ce",
+      "lastModified": 1762833077784,
+      "size": 1105,
+      "scanned": false
+    }
+  ]
+}

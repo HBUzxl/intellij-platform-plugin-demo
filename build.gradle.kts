@@ -34,6 +34,15 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
 
+    // ✅ 加上 ACP 客户端（基于 stdio 的最小接入）
+    implementation(libs.acp)
+    // 如需走 HTTP/WebSocket 到远端 Agent，再加（可选）：
+    // implementation(libs.acp.ktor)
+
+    // 协程依赖
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4") // 若你的 acp 版本未传递这个
+
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))

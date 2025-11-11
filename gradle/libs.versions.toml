@@ -2,6 +2,7 @@
 # libraries
 junit = "4.13.2"
 opentest4j = "1.3.0"
+acp = "0.4.0"            # ACP Kotlin SDK 版本
 
 # plugins
 changelog = "2.4.0"
@@ -13,6 +14,9 @@ qodana = "2025.1.1"
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
+acp = { module = "com.agentclientprotocol:acp", version.ref = "acp" }
+# 如需远程 HTTP/WebSocket 传输（非 stdio），再加：
+# acp-ktor = { module = "com.agentclientprotocol:acp-ktor-client", version.ref = "acp" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

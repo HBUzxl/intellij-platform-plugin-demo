@@ -41,7 +41,7 @@ dependencies {
 
     // 协程依赖
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4") // 若你的 acp 版本未传递这个
+    implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0") // 若你的 acp 版本未传递这个
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
